@@ -8,13 +8,66 @@ output:
 
 ## Loading and preprocessing the data
 
+The GitHub repository also contains the dataset for the assignment so you do not have to download the data separately.
 
+### Loading data
+
+So we just unzip it and read into the data frame
+```{r}
+unzip(zipfile = "activity.zip", files = "activity.csv")
+data <- read.csv(file = "activity.csv", na.strings = "NA")
+```
+
+Let's make some assertions
+```{r}
+assertthat::are_equal(nrow(data), 17568) # As given in task
+assertthat::are_equal(ncol(data), 3) # As given in task
+```
+
+Let's have a look at the data
+```{r}
+colnames(data)
+head(data)
+tail(data)
+```
+
+### Process/transform the data (if necessary) into a format suitable for your analysis
+
+```{r}
+data = transform(data, date = as.Date(date))
+
+library(data.table)
+
+datt <- data.table(data)
+```
 
 ## What is mean total number of steps taken per day?
 
+Missing values are ignored.
 
+### Make a histogram of the total number of steps taken each day
+```{r}
+sum_by_days <- datt[, sum(steps, na.rm = TRUE), by = date]$V1
+hist(sum_by_days,
+     main = "Histogram of the total number of steps taken each day",
+     xlab = "Sum of steps by days",
+     ylab = "Frequency")
+```
+
+### Calculate and report the mean and median total number of steps taken per day
+```{r}
+mean(sum_by_days)
+median(sum_by_days)
+```
 
 ## What is the average daily activity pattern?
+
+
+
+    Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+
+    Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
 
 
 

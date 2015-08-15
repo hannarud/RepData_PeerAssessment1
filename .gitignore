@@ -1,0 +1,10 @@
+# R Workspace Specific
+.RData
+.Rhistory
+
+# Data files
+*.csv
+
+# Rmd Specific
+PA1_template.md
+PA1_template_files/
