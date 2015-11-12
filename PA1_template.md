@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
@@ -19,7 +14,6 @@ Sys.setlocale("LC_TIME", "C")
 ```
 ## [1] "C"
 ```
-
 
 ### Loading data
 
@@ -93,14 +87,7 @@ tail(data)
 data = transform(data, date = as.Date(date))
 
 library(data.table)
-```
 
-```
-## data.table 1.9.4  For help type: ?data.table
-## *** NB: by=.EACHI is now explicit. See README to restore previous behaviour.
-```
-
-```r
 datt <- data.table(data)
 ```
 
@@ -118,7 +105,7 @@ hist(sum_by_days,
      ylab = "Frequency")
 ```
 
-![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
 
 ### Calculate and report the mean and median total number of steps taken per day
 
@@ -142,19 +129,21 @@ median(sum_by_days)
 
 ### Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
-Again, ignoring missing values
+Again, ignoring missing values.
+`288` is the number of 5-minute intervals in one day.
+61 is 17568/288 and is number of days on which we had an observations.
 
 
 ```r
-datt$interval_num = datt$interval/5 %% 288
+datt$interval_num = rep(1:288, 61)
 datt_grouped_by_int_avg_steps <- datt[, mean(steps, na.rm = TRUE),
                                      by = interval_num]$V1
-plot(1:288, datt_grouped_by_int_avg_steps,
+plot(datt_grouped_by_int_avg_steps,
      type = "l", xlab = "5-minute interval number",
      ylab = "Avg. num. of steps")
 ```
 
-![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
 
 ### Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
@@ -181,30 +170,25 @@ sum(!complete.cases(datt))
 
 ### Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 
-Let's use the mean for that 5-minute interval! (But as my research resulted, we'll still get some NAs) there. If this happens, we'll use 0
-
 ### Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
 
 ```r
 datt$complete_steps <- ifelse(is.na(datt$steps),
-                         ifelse(is.na(
-                             datt_grouped_by_int_avg_steps[datt$interval_num]),
-                             0,
-                             datt_grouped_by_int_avg_steps[datt$interval_num]),
-                         datt$steps)
+                              datt_grouped_by_int_avg_steps[datt$interval_num],
+                              datt$steps)
 newdatt <- datt[, c("complete_steps", "date", "interval", "interval_num"), with = FALSE]
 head(newdatt)
 ```
 
 ```
 ##    complete_steps       date interval interval_num
-## 1:      1.7169811 2012-10-01        0            0
-## 2:      0.3396226 2012-10-01        5            1
-## 3:      0.1320755 2012-10-01       10            2
-## 4:      0.1509434 2012-10-01       15            3
-## 5:      0.0754717 2012-10-01       20            4
-## 6:      2.0943396 2012-10-01       25            5
+## 1:      1.7169811 2012-10-01        0            1
+## 2:      0.3396226 2012-10-01        5            2
+## 3:      0.1320755 2012-10-01       10            3
+## 4:      0.1509434 2012-10-01       15            4
+## 5:      0.0754717 2012-10-01       20            5
+## 6:      2.0943396 2012-10-01       25            6
 ```
 
 ```r
@@ -226,14 +210,14 @@ hist(new_sum_by_days,
      ylab = "Frequency")
 ```
 
-![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-12-1.png) 
 
 ```r
 mean(new_sum_by_days)
 ```
 
 ```
-## [1] 10285.23
+## [1] 10766.19
 ```
 
 ```r
@@ -241,10 +225,10 @@ median(new_sum_by_days)
 ```
 
 ```
-## [1] 10395
+## [1] 10766.19
 ```
 
-So, the mean has increased, the median left as it was (because it's the robust estimate, I suppose).
+Both the mean and the median have increased. It is so because we filled missing values with that interval average and we had non-missing values for the most active days of a person.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -272,12 +256,14 @@ weekends_grouped_by_int_avg_steps <- newdatt[dayss == "weekend",
                                              mean(complete_steps, na.rm = TRUE),
                                              by = interval_num]$V1
 par(mfcol = c(2, 1))
-plot(1:288, weekdays_grouped_by_int_avg_steps,
+plot(weekdays_grouped_by_int_avg_steps,
      type = "l", xlab = "5-minute interval number",
      ylab = "Avg. num. of steps", main = "Steps on weekdays")
-plot(1:288, weekends_grouped_by_int_avg_steps,
+plot(weekends_grouped_by_int_avg_steps,
      type = "l", xlab = "5-minute interval number",
      ylab = "Avg. num. of steps", main = "Steps on weekends")
 ```
 
-![plot of chunk unnamed-chunk-15](figure/unnamed-chunk-15-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-15-1.png) 
+
+The difference is evident. Seems like this person walks to work at weekdays and spending active weekends.
